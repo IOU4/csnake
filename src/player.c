@@ -1,4 +1,5 @@
 #include "mouvment.h"
+#include "egg.h"
 #include <ncurses.h>
 
 typedef struct {
@@ -42,30 +43,30 @@ int m_right(int x, int width) {
    return x;
 }
 
-void display_snake(WINDOW *win, Body *head, int head_char, int body_char) {
-   Body *tmp = head->next;
-   mvwaddch(win, head->y_loc, head->x_loc, head_char);
+void display_snake(Snake snake) {
+   // print head
+   Body *tmp = snake.head->next;
+   mvwaddch(snake.win, snake.head->y_loc, snake.head->x_loc, snake.head_char);
+
+   // print body
    while(tmp != NULL) {
-      mvwaddch(win, tmp->y_loc, tmp->x_loc, body_char);
+      mvwaddch(snake.win, tmp->y_loc, tmp->x_loc, snake.body_char);
       tmp = tmp->next;
    }
-   wrefresh(win);
+
+   wrefresh(snake.win);
 }
 
-void make_move(Snake snake) {
-   WINDOW *win = snake.win; Body *head = snake.head; int height = snake.y_max; int width = snake.x_max; int head_char = snake.head_char; int body_char = snake.body_char;
-   wtimeout(win, 200);
-   int direction;
-   bool delete = true;
-   while(1) {
-      display_snake(win, head, head_char, body_char);
-      int c = wgetch(win);
-      if(c == KEY_UP || c == KEY_DOWN || c == KEY_LEFT || c == KEY_RIGHT)
-         direction = c;
-      Body *last = find_last(head);
-      mvwaddch(win, last->y_loc, last->x_loc, ' ');
+void get_direction (int c, int *direction) {
+   if(c == 'k' || c == KEY_UP || c == KEY_DOWN || c == KEY_LEFT || c == KEY_RIGHT)
+      if(!((c == KEY_UP && *direction == KEY_DOWN) || (c == KEY_DOWN && *direction == KEY_UP) || (c == KEY_LEFT && *direction == KEY_RIGHT) || (*direction == KEY_LEFT && c == KEY_RIGHT)))
+         *direction = c;
+}
+
+void redirect(int direction, Body *head, int height, int width, bool delete) {
       switch(direction) {
          case KEY_UP:
+         case 'k':
             add_head(m_up(head->y_loc, height), head->x_loc, head, delete);
             break;
          case KEY_DOWN: 
@@ -78,8 +79,37 @@ void make_move(Snake snake) {
             add_head(head->y_loc, m_right(head->x_loc, width), head, delete);
             break;
       }
+}
+
+void make_move(Snake snake) {
+   WINDOW *win = snake.win; Body *head = snake.head; int height = snake.y_max; int width = snake.x_max; int head_char = snake.head_char; int body_char = snake.body_char;
+   wtimeout(snake.win, 200);
+
+   int direction;
+   bool delete = true;
+
+   Egg *egg = malloc(sizeof(Egg));
+   egg->no_eggs = true;
+   
+   while(1) {
+      display_snake(snake);
+      display_egg(win, snake.y_max, snake.x_max, egg);
+
+      int c = wgetch(win);
+      get_direction(c, &direction);
+
+      // delete last node
+      Body *last = find_last(head);
+      mvwaddch(win, last->y_loc, last->x_loc, ' ');
+
+      redirect(direction, head, height, width, delete);
+
       delete = true;
       if (c == 'q') break;
-      if (c == 'a') delete = false;
+      //mvwprintw(win, 17, 2, "egg_y = %d, head_y = %d \n egg_x = %d, head_x = %d \n no_eggs = %d", egg->y_loc, head->y_loc, egg->x_loc, head->x_loc, egg->no_eggs);
+      if (egg->y_loc == head->y_loc && egg->x_loc == head->x_loc || c == 'a'){
+         delete = false;
+         egg->no_eggs = true;
+      }
    }
 }

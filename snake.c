@@ -1,4 +1,4 @@
-#include<ncurses.h>
+#include <ncurses.h>
 #include "src/player.h"
 
 #define height 20
@@ -17,8 +17,6 @@ int main() {
    curs_set(0);
 
    Body *head = create_Body(10, 15);
-   add_end(head, create_Body(10, 14));
-   add_end(head, create_Body(10, 13));
 
    Snake snake = init_snake(win, '@', '-', height, width, head);
    make_move(snake);
