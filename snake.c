@@ -9,16 +9,16 @@ int main() {
    initscr();
    noecho();
    
-   WINDOW *win = newwin(height, width, 0, 0);
+   WINDOW *playground = newwin(height, width, 0, 0);
    refresh();
-   box(win, 0, 0);
-   wrefresh(win);
-   keypad(win, true);
+   box(playground, 0, 0);
+   wrefresh(playground);
+   keypad(playground, true);
    curs_set(0);
 
    Body *head = create_Body(10, 15);
 
-   Snake snake = init_snake(win, '@', '-', height, width, head);
+   Snake snake = init_snake(playground, '@', 46, height, width, head);
    make_move(snake);
    
    getch();

@@ -1,6 +1,7 @@
 #include "mouvment.h"
 #include "egg.h"
 #include <ncurses.h>
+#include <unistd.h>
 
 typedef struct {
    WINDOW *win;
@@ -58,8 +59,22 @@ void display_snake(Snake snake) {
 }
 
 void get_direction (int c, int *direction) {
-   if(c == 'k' || c == KEY_UP || c == KEY_DOWN || c == KEY_LEFT || c == KEY_RIGHT)
-      if(!((c == KEY_UP && *direction == KEY_DOWN) || (c == KEY_DOWN && *direction == KEY_UP) || (c == KEY_LEFT && *direction == KEY_RIGHT) || (*direction == KEY_LEFT && c == KEY_RIGHT)))
+   if(
+      c == 'k' 
+      || c == 'j'
+      || c == 'h'
+      || c == 'l'
+      || c == KEY_UP 
+      || c == KEY_DOWN 
+      || c == KEY_LEFT 
+      || c == KEY_RIGHT
+      )
+      if(!(
+         (c == KEY_UP && *direction == KEY_DOWN) 
+         || (c == KEY_DOWN && *direction == KEY_UP) 
+         || (c == KEY_LEFT && *direction == KEY_RIGHT) 
+         || (*direction == KEY_LEFT && c == KEY_RIGHT)
+         ))
          *direction = c;
 }
 
@@ -70,15 +85,28 @@ void redirect(int direction, Body *head, int height, int width, bool delete) {
             add_head(m_up(head->y_loc, height), head->x_loc, head, delete);
             break;
          case KEY_DOWN: 
+         case 'j':
             add_head(m_down(head->y_loc, height), head->x_loc, head, delete);
             break;
          case KEY_LEFT: 
+         case 'h':
             add_head(head->y_loc, m_left(head->x_loc, width), head, delete);
             break;
          case KEY_RIGHT:
+         case 'l':
             add_head(head->y_loc, m_right(head->x_loc, width), head, delete);
             break;
       }
+}
+
+bool is_head_on_body(Body *head) {
+   Body *tmp = head->next;
+   while(tmp != NULL) {
+      if(head->x_loc == tmp->x_loc && head->y_loc == tmp->y_loc) 
+         return true;
+      tmp = tmp->next;
+   }
+   return false;
 }
 
 void make_move(Snake snake) {
@@ -96,6 +124,7 @@ void make_move(Snake snake) {
       display_egg(win, snake.y_max, snake.x_max, egg);
 
       int c = wgetch(win);
+      //usleep(200000);
       get_direction(c, &direction);
 
       // delete last node
@@ -106,7 +135,8 @@ void make_move(Snake snake) {
 
       delete = true;
       if (c == 'q') break;
-      //mvwprintw(win, 17, 2, "egg_y = %d, head_y = %d \n egg_x = %d, head_x = %d \n no_eggs = %d", egg->y_loc, head->y_loc, egg->x_loc, head->x_loc, egg->no_eggs);
+      if (is_head_on_body(head)) break;
+      if(c == 'v' ) mvwprintw(win, 17, 2, "egg_y = %d, head_y = %d \n egg_x = %d, head_x = %d \n no_eggs = %d", egg->y_loc, head->y_loc, egg->x_loc, head->x_loc, egg->no_eggs);
       if (egg->y_loc == head->y_loc && egg->x_loc == head->x_loc || c == 'a'){
          delete = false;
          egg->no_eggs = true;
