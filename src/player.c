@@ -1,19 +1,4 @@
-// #include "mouvment.h"
-#include "egg.h"
-#include <ncurses.h>
-#include <string.h>
-
-typedef struct {
-  WINDOW *win;
-  char *head_char;
-  char *body_char;
-  int y_max;
-  int x_max;
-  Body *head;
-} Snake;
-
-Snake init_snake(WINDOW *win, char *head_char, char *body_char, int y_max,
-                 int x_max, Body *head) {
+Snake init_snake(WINDOW *win, char *head_char, char *body_char, int y_max, int x_max, Body *head) {
   Snake tmp;
   tmp.head_char = malloc(4);
   tmp.body_char = malloc(4);
@@ -75,23 +60,23 @@ void get_direction(int c, int *direction) {
       *direction = c;
 }
 
-void redirect(int direction, Body *head, int height, int width, bool delete) {
+void redirect(int direction, Body *head, int height, int width, bool delete_last) {
   switch (direction) {
   case KEY_UP:
   case 'k':
-    add_head(m_up(head->y_loc, height), head->x_loc, head, delete);
+    add_head(m_up(head->y_loc, height), head->x_loc, head, delete_last);
     break;
   case KEY_DOWN:
   case 'j':
-    add_head(m_down(head->y_loc, height), head->x_loc, head, delete);
+    add_head(m_down(head->y_loc, height), head->x_loc, head, delete_last);
     break;
   case KEY_LEFT:
   case 'h':
-    add_head(head->y_loc, m_left(head->x_loc, width), head, delete);
+    add_head(head->y_loc, m_left(head->x_loc, width), head, delete_last);
     break;
   case KEY_RIGHT:
   case 'l':
-    add_head(head->y_loc, m_right(head->x_loc, width), head, delete);
+    add_head(head->y_loc, m_right(head->x_loc, width), head, delete_last);
     break;
   }
 }
@@ -126,7 +111,7 @@ void make_move(Snake snake) {
     int c = wgetch(win);
     get_direction(c, &direction);
 
-    // delete last node
+    // delete_last last node
     Body *last = find_last(head);
     mvwaddch(win, last->y_loc, last->x_loc, ' ');
 

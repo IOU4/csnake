@@ -2,8 +2,8 @@
 #include <locale.h>
 #include <ncurses.h>
 
-#define height 20
-#define width 30
+#define height LINES
+#define width COLS
 
 int main() {
   setlocale(LC_ALL, "");

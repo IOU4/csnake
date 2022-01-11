@@ -1,12 +1,3 @@
-#include <stdbool.h>
-#include <stdlib.h>
-
-typedef struct Body {
-  int y_loc;
-  int x_loc;
-  struct Body *next;
-} Body;
-
 Body *create_Body(int y, int x) {
   Body *tmp = malloc(sizeof(Body));
   tmp->next = NULL;

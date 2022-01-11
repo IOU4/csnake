@@ -1,14 +1,3 @@
-#include "mouvment.h"
-#include <ncurses.h>
-#include <stdlib.h>
-#include <time.h>
-
-typedef struct {
-  int y_loc;
-  int x_loc;
-  int counter;
-  bool no_eggs;
-} Egg;
 
 int *get_random_egg(int height, int width) {
   srand(time(0));
