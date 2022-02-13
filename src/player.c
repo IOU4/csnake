@@ -118,10 +118,9 @@ void make_move(Snake snake) {
     redirect(direction, head, height, width, delete_last);
 
     delete_last = true;
-    if (c == 'q')
+    if (c == 'q' || is_head_on_body(head)){
       break;
-    if (is_head_on_body(head))
-      break;
+    }
     if (c == 'v')
       mvwprintw(
           win, 17, 2,
@@ -134,4 +133,17 @@ void make_move(Snake snake) {
       delete_last = false;
     }
   }
+}
+
+void play(int width, int height, float percentage) {
+  int playground_width = width-width*percentage;
+  WINDOW *playground = newwin(height, playground_width, 0, 0);
+  box(playground, 0, 0);
+  refresh();
+  wrefresh(playground);
+  keypad(playground, true);
+  curs_set(0);
+  Body *head = create_Body(height/2, width/2);
+  Snake snake = init_snake(playground, "ﱢ", "ﱢ", height, playground_width, head);
+  make_move(snake);
 }

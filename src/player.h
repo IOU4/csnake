@@ -24,6 +24,7 @@ void get_direction(int c, int *direction);
 void redirect(int direction, Body *head, int height, int width, bool delete_last);
 bool is_head_on_body(Body *head);
 void make_move(Snake snake);
+void play(int width, int height, float percentage);
 
 #include "player.c"
 
