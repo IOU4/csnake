@@ -3,6 +3,7 @@
 
 #include <ncurses.h>
 
-void prompt_menu(int width, int height, float percentage);
+WINDOW * prompt_menu(int width, int height, float percentage);
+void print_score(WINDOW *menu, int score);
 #include "menu.c"
 #endif

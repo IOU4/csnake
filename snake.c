@@ -12,8 +12,8 @@ int main() {
   initscr();
   noecho();
   curs_set(0);
-  prompt_menu(width, height, percentage);
-  play(width, height, percentage);
+  WINDOW *menu = prompt_menu(width, height, percentage);
+  play(width, height, percentage, menu);
 
   getch();
   endwin();

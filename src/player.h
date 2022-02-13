@@ -1,6 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include "menu.h"
 #include "egg.h"
 #include <ncurses.h>
 #include <string.h>
@@ -23,8 +24,8 @@ void display_snake(Snake snake);
 void get_direction(int c, int *direction);
 void redirect(int direction, Body *head, int height, int width, bool delete_last);
 bool is_head_on_body(Body *head);
-void make_move(Snake snake);
-void play(int width, int height, float percentage);
+void make_move(Snake snake, WINDOW* menu);
+void play(int width, int height, float percentage, WINDOW *menu);
 
 #include "player.c"
 

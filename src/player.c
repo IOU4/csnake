@@ -1,3 +1,4 @@
+#include "player.h"
 Snake init_snake(WINDOW *win, char *head_char, char *body_char, int y_max, int x_max, Body *head) {
   Snake tmp;
   tmp.head_char = malloc(4);
@@ -36,8 +37,6 @@ void display_snake(Snake snake) {
   Body *tmp = snake.head->next;
   mvwprintw(snake.win, snake.head->y_loc, snake.head->x_loc, "%s",
             snake.head_char);
-  attroff(COLOR_PAIR(1));
-
   // print body
   while (tmp != NULL) {
     mvwprintw(snake.win, tmp->y_loc, tmp->x_loc, "%s", snake.body_char);
@@ -60,7 +59,7 @@ void get_direction(int c, int *direction) {
       *direction = c;
 }
 
-void redirect(int direction, Body *head, int height, int width, bool delete_last) {
+void redirect(int direction, Body *head, int height, int width,  bool delete_last) {
   switch (direction) {
   case KEY_UP:
   case 'k':
@@ -91,11 +90,12 @@ bool is_head_on_body(Body *head) {
   return false;
 }
 
-void make_move(Snake snake) {
+void make_move(Snake snake, WINDOW *menu) {
   WINDOW *win = snake.win;
   Body *head = snake.head;
   int height = snake.y_max;
   int width = snake.x_max;
+  int score = 0;
   wtimeout(snake.win, 200);
 
   int direction;
@@ -106,6 +106,7 @@ void make_move(Snake snake) {
 
   while (1) {
     display_snake(snake);
+    print_score(menu, score);
     display_egg(snake.head, win, snake.y_max, snake.x_max, egg);
 
     int c = wgetch(win);
@@ -131,11 +132,12 @@ void make_move(Snake snake) {
     if (egg->y_loc == head->y_loc && egg->x_loc == head->x_loc) {
       egg->no_eggs = true;
       delete_last = false;
+      score++;
     }
   }
 }
 
-void play(int width, int height, float percentage) {
+void play(int width, int height, float percentage, WINDOW *menu) {
   int playground_width = width-width*percentage;
   WINDOW *playground = newwin(height, playground_width, 0, 0);
   box(playground, 0, 0);
@@ -145,5 +147,5 @@ void play(int width, int height, float percentage) {
   curs_set(0);
   Body *head = create_Body(height/2, width/2);
   Snake snake = init_snake(playground, "ﱢ", "ﱢ", height, playground_width, head);
-  make_move(snake);
+  make_move(snake, menu);
 }
