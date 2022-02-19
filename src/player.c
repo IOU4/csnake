@@ -1,3 +1,5 @@
+#include <curses.h>
+#include <ncurses.h>
 #include "player.h"
 Snake init_snake(WINDOW *win, char *head_char, char *body_char, int y_max, int x_max, Body *head) {
   Snake tmp;
@@ -90,12 +92,18 @@ bool is_head_on_body(Body *head) {
   return false;
 }
 
-void make_move(Snake snake, WINDOW *menu) {
-  WINDOW *win = snake.win;
-  Body *head = snake.head;
-  int height = snake.y_max;
-  int width = snake.x_max;
+void end_game(WINDOW *win, int height, int width,int score) {
+  if (score > get_high_score()) {
+    store_high_score(score);
+    mvwprintw(win, height/2, width/2, "new high score");
+  }
+  else mvwprintw(win, height/2, width/2, "game over");
+  wrefresh(win);
+}
+
+int make_move(Snake snake, WINDOW *menu) {
   int score = 0;
+  const int high_score = get_high_score();
   wtimeout(snake.win, 200);
 
   int direction;
@@ -106,31 +114,33 @@ void make_move(Snake snake, WINDOW *menu) {
 
   while (1) {
     display_snake(snake);
-    print_score(menu, score);
-    display_egg(snake.head, win, snake.y_max, snake.x_max, egg);
+    print_score(menu, score, high_score);
+    display_egg(snake.head, snake.win, snake.y_max, snake.x_max, egg);
 
-    int c = wgetch(win);
+    int c = wgetch(snake.win);
     get_direction(c, &direction);
 
-    // delete_last last node
-    Body *last = find_last(head);
-    mvwaddch(win, last->y_loc, last->x_loc, ' ');
+    Body *last = find_last(snake.head);
+    mvwaddch(snake.win, last->y_loc, last->x_loc, ' ');
 
-    redirect(direction, head, height, width, delete_last);
+    redirect(direction, snake.head, snake.y_max, snake.x_max, delete_last);
 
     delete_last = true;
-    if (c == 'q' || is_head_on_body(head)){
-      break;
+
+    if (egg->y_loc == snake.head->y_loc && egg->x_loc == snake.head->x_loc) {
+      egg->no_eggs = true;
+      delete_last = false;
+      score++;
+    }
+    if (c == 'q' || is_head_on_body(snake.head)){
+      return score;
     }
     if (c == 'v')
       mvwprintw(
-          win, 17, 2,
+          snake.win, snake.y_max-1, snake.x_max-1,
           "egg_y = %d, head_y = %d \n egg_x = %d, head_x = %d \n no_eggs = %d",
-          egg->y_loc, head->y_loc, egg->x_loc, head->x_loc, egg->no_eggs);
-    if (c == 'a')
-      delete_last = false;
-    if (egg->y_loc == head->y_loc && egg->x_loc == head->x_loc) {
-      egg->no_eggs = true;
+          egg->y_loc, snake.head->y_loc, egg->x_loc, snake.head->x_loc, egg->no_eggs);
+    if (c == 'a') {
       delete_last = false;
       score++;
     }
@@ -147,5 +157,6 @@ void play(int width, int height, float percentage, WINDOW *menu) {
   curs_set(0);
   Body *head = create_Body(height/2, width/2);
   Snake snake = init_snake(playground, "ﱢ", "ﱢ", height, playground_width, head);
-  make_move(snake, menu);
+  int score = make_move(snake, menu);
+  end_game(playground, height, playground_width, score);
 }
